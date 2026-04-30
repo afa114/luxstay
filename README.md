@@ -199,3 +199,12 @@ hotel-app/
 | Upload    | Multer                        |
 | Security  | Helmet + express-rate-limit   |
 | Images    | Unsplash (free)               |
+
+
+## 🔒 Security
+
+This project was used as a penetration testing 
+target in a controlled lab environment.
+
+All identified vulnerabilities have been 
+remediated. The system is now secure.
