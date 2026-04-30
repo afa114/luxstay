@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Favorites | LuxStay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>.line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}</style>
+</head>
+<body class="bg-gray-50" x-data>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<div class="pt-16 min-h-screen">
+  <div class="bg-gray-900 text-white py-10">
+    <div class="max-w-6xl mx-auto px-4">
+      <h1 class="text-3xl font-bold mb-1">❤️ My Favorites</h1>
+      <p class="text-gray-400">Hotels you've saved</p>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <% if (favorites.length === 0) { %>
+      <div class="text-center py-20 bg-white rounded-2xl border border-gray-100">
+        <p class="text-5xl mb-4">❤️</p>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">No favorites yet</h3>
+        <p class="text-gray-400 mb-6">Save hotels you love to find them easily later.</p>
+        <a href="/hotels" class="px-6 py-3 bg-amber-500 text-white font-semibold rounded-full hover:bg-amber-600 transition-all">Browse Hotels</a>
+      </div>
+    <% } else { %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% favorites.forEach(fav => { %>
+          <% const hotel = fav.hotel; %>
+          <% const minPrice = hotel.rooms && hotel.rooms.length ? Math.min(...hotel.rooms.map(r => parseFloat(r.price))) : null; %>
+          <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
+            <div class="relative overflow-hidden aspect-[4/3]">
+              <img src="<%= hotel.mainImage || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=600' %>"
+                alt="<%= hotel.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onerror="this.src='https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=600'"/>
+              <div class="absolute top-3 right-3">
+                <span class="px-2.5 py-1 text-xs font-bold bg-amber-500 text-white rounded-full"><%= hotel.stars %>★</span>
+              </div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold text-gray-900 mb-1 line-clamp-1"><%= hotel.name %></h3>
+              <p class="text-xs text-gray-500 mb-3"><%= hotel.city %>, <%= hotel.country %></p>
+              <div class="flex items-center justify-between">
+                <% if (minPrice) { %>
+                  <p class="text-lg font-bold text-gray-900">$<%= minPrice.toFixed(0) %><span class="text-xs font-normal text-gray-400">/night</span></p>
+                <% } else { %><p class="text-sm text-gray-400">Price on request</p><% } %>
+                <a href="/hotels/<%= hotel.slug %>" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-full transition-all">View</a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+</body>
+</html>

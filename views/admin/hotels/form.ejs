@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %> | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100" x-data>
+<%- include('../../partials/navbar') %>
+<%- include('../../partials/flash') %>
+<div class="pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="mb-6">
+      <a href="/admin/hotels" class="text-sm text-gray-400 hover:text-gray-600">← Back to Hotels</a>
+      <h1 class="text-2xl font-bold text-gray-900 mt-1"><%= title %></h1>
+    </div>
+    <form action="/admin/hotels<%= hotel ? '/' + hotel.id + '?_method=PUT' : '' %>" method="POST" enctype="multipart/form-data" class="space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+        <h2 class="font-bold text-gray-800 text-lg">Basic Information</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hotel Name *</label>
+            <input type="text" name="name" required value="<%= hotel ? hotel.name : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+            <select name="category" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <% ['luxury','resort','boutique','business','budget'].forEach(c => { %>
+                <option value="<%= c %>" <%= hotel && hotel.category === c ? 'selected' : '' %>><%= c.charAt(0).toUpperCase() + c.slice(1) %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+            <input type="text" name="city" required value="<%= hotel ? hotel.city : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+            <input type="text" name="country" required value="<%= hotel ? hotel.country : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <input type="text" name="address" value="<%= hotel ? hotel.address : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Stars (1-5)</label>
+            <select name="stars" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <% for(let i=5;i>=1;i--){ %><option value="<%= i %>" <%= hotel && hotel.stars === i ? 'selected' : '' %>><%= i %> Stars</option><% } %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <input type="text" name="phone" value="<%= hotel ? hotel.phone : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" name="email" value="<%= hotel ? hotel.email : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Check-in Time</label>
+            <input type="text" name="checkInTime" value="<%= hotel ? hotel.checkInTime : '14:00' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Check-out Time</label>
+            <input type="text" name="checkOutTime" value="<%= hotel ? hotel.checkOutTime : '12:00' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea name="description" rows="4" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"><%= hotel ? hotel.description : '' %></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Amenities (comma separated)</label>
+          <input type="text" name="amenities" value="<%= hotel && hotel.amenities ? hotel.amenities.join(', ') : '' %>" placeholder="Free WiFi, Pool, Spa, Gym..."
+            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+        <h2 class="font-bold text-gray-800 text-lg">Images</h2>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Main Image URL</label>
+          <input type="text" name="mainImageUrl" value="<%= hotel ? hotel.mainImage : '' %>" placeholder="https://images.unsplash.com/..."
+            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Gallery Image URLs (one per line)</label>
+          <textarea name="imageUrls" rows="5" placeholder="https://images.unsplash.com/photo-1..." class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"><%= hotel && hotel.images ? hotel.images.join('\n') : '' %></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Or Upload Main Image</label>
+          <input type="file" name="mainImage" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"/>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button type="submit" class="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-all shadow-md">
+          <%= hotel ? 'Update Hotel' : 'Create Hotel' %>
+        </button>
+        <a href="/admin/hotels" class="px-6 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-all">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../../partials/footer') %>
+</body>
+</html>

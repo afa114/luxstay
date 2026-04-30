@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= hotel.name %> | LuxStay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  </style>
+</head>
+<body class="bg-gray-50" x-data="{ lightboxOpen: false, activeImg: '', showReviewForm: false }">
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<div class="pt-16">
+  <% const allImages = [hotel.mainImage, ...(hotel.images||[])].filter(Boolean); if(!allImages.length) allImages.push('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200&q=80'); %>
+  <div class="bg-black">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+      <div class="grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden" style="height:460px">
+        <div class="col-span-2 row-span-2 cursor-pointer overflow-hidden group" @click="activeImg='<%= allImages[0] %>'; lightboxOpen=true">
+          <img src="<%= allImages[0] %>" alt="<%= hotel.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800'"/>
+        </div>
+        <% for(let i=1;i<Math.min(5,allImages.length);i++){%>
+          <div class="cursor-pointer overflow-hidden group" @click="activeImg='<%=allImages[i]%>'; lightboxOpen=true">
+            <img src="<%=allImages[i]%>" alt="" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400'"/>
+          </div>
+        <%}%>
+        <% for(let i=allImages.length;i<5;i++){%><div class="bg-gray-800"></div><%}%>
+      </div>
+    </div>
+  </div>
+  <div x-show="lightboxOpen" @click.self="lightboxOpen=false" x-transition class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+    <button @click="lightboxOpen=false" class="absolute top-4 right-4 text-white text-3xl">✕</button>
+    <img :src="activeImg" class="max-w-4xl max-h-[80vh] object-contain rounded-xl"/>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Header -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-2">
+            <span class="px-3 py-1 bg-amber-100 text-amber-700 text-sm font-semibold rounded-full capitalize"><%= hotel.category %></span>
+            <span class="text-amber-400 font-bold"><%= stars(hotel.stars) %></span>
+            <% if(hotel.rating>0){%>
+              <div class="flex items-center gap-1.5 bg-green-50 px-3 py-1 rounded-full">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <span class="text-sm font-bold text-green-700"><%= hotel.rating %></span>
+                <span class="text-xs text-gray-400">(<%= hotel.reviewCount %> reviews)</span>
+              </div>
+            <%}%>
+            <% if(currentUser){%>
+              <button onclick="toggleFavorite(<%= hotel.id %>)" id="favBtn"
+                class="flex items-center gap-1.5 px-3 py-1 border border-red-200 text-red-400 hover:bg-red-50 rounded-full transition-all text-sm">
+                <span id="favIcon">♡</span><span id="favText">Save</span>
+              </button>
+            <%}%>
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2"><%= hotel.name %></h1>
+          <p class="text-gray-500 flex items-center gap-1">
+            <svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <%= hotel.address %>, <%= hotel.city %>, <%= hotel.country %>
+          </p>
+        </div>
+
+        <!-- About -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 class="text-xl font-bold text-gray-900 mb-3">About This Hotel</h2>
+          <p class="text-gray-600 leading-relaxed"><%= hotel.description %></p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-gray-100">
+            <div class="text-center"><p class="text-xs text-gray-400 mb-1">Check-in</p><p class="font-bold text-gray-800"><%= hotel.checkInTime %></p></div>
+            <div class="text-center"><p class="text-xs text-gray-400 mb-1">Check-out</p><p class="font-bold text-gray-800"><%= hotel.checkOutTime %></p></div>
+            <div class="text-center"><p class="text-xs text-gray-400 mb-1">Phone</p><p class="font-bold text-gray-800 text-xs"><%= hotel.phone||'N/A' %></p></div>
+            <div class="text-center"><p class="text-xs text-gray-400 mb-1">Email</p><p class="font-bold text-gray-800 text-xs truncate"><%= hotel.email||'N/A' %></p></div>
+          </div>
+        </div>
+
+        <!-- Amenities -->
+        <% if(hotel.amenities&&hotel.amenities.length>0){%>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">Amenities</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <%hotel.amenities.forEach(a=>{%>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs flex-shrink-0">✓</span><%= a %>
+              </div>
+            <%})%>
+          </div>
+        </div>
+        <%}%>
+
+        <!-- Google Maps -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">📍 Location on Map</h2>
+          <div class="rounded-xl overflow-hidden" style="height:260px">
+            <iframe width="100%" height="100%" style="border:0" loading="lazy" allowfullscreen
+              src="https://maps.google.com/maps?q=<%= encodeURIComponent(hotel.address+', '+hotel.city+', '+hotel.country) %>&output=embed">
+            </iframe>
+          </div>
+        </div>
+
+        <!-- Rooms -->
+        <div id="rooms" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 class="text-xl font-bold text-gray-900 mb-6">Available Rooms</h2>
+          <% if(!hotel.rooms||hotel.rooms.length===0){%>
+            <p class="text-gray-400 text-center py-8">No rooms available.</p>
+          <%} else {%>
+            <div class="space-y-5">
+              <%hotel.rooms.forEach(room=>{%>
+                <% const ri=room.image||(room.images&&room.images[0])||'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600'; %>
+                <div class="flex flex-col sm:flex-row gap-4 p-4 border border-gray-100 rounded-xl hover:border-amber-300 hover:bg-amber-50/30 transition-all group">
+                  <div class="sm:w-40 h-32 sm:h-28 rounded-xl overflow-hidden flex-shrink-0">
+                    <img src="<%= ri %>" alt="<%= room.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400'"/>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                      <div>
+                        <h3 class="font-bold text-gray-900"><%= room.name %></h3>
+                        <div class="flex flex-wrap gap-1.5 mt-1">
+                          <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full capitalize"><%= room.type %></span>
+                          <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full"><%= room.bedType %> Bed</span>
+                          <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full"><%= room.size %>m²</span>
+                          <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">Max <%= room.capacity %> guests</span>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-2xl font-bold text-gray-900">$<%= parseFloat(room.price).toFixed(0) %></p>
+                        <p class="text-xs text-gray-400">per night</p>
+                      </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 line-clamp-2"><%= room.description %></p>
+                    <%if(currentUser){%>
+                      <a href="/bookings/new/<%= room.id %>" class="inline-block px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-full transition-all shadow-sm active:scale-95">Book This Room</a>
+                    <%} else {%>
+                      <a href="/auth/login" class="inline-block px-5 py-2 border-2 border-amber-500 text-amber-600 text-sm font-semibold rounded-full hover:bg-amber-50 transition-all">Sign in to Book</a>
+                    <%}%>
+                  </div>
+                </div>
+              <%})%>
+            </div>
+          <%}%>
+        </div>
+
+        <!-- Reviews -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-xl font-bold text-gray-900">Guest Reviews</h2>
+            <%if(currentUser){%>
+              <button @click="showReviewForm=!showReviewForm" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-full transition-all">+ Write Review</button>
+            <%}%>
+          </div>
+
+          <%if(currentUser){%>
+          <div x-show="showReviewForm" x-transition class="mb-6 p-5 bg-amber-50 rounded-xl border border-amber-200">
+            <form action="/reviews" method="POST" x-data="{rating:5}">
+              <input type="hidden" name="hotelId" value="<%= hotel.id %>"/>
+              <input type="hidden" name="slug" value="<%= hotel.slug %>"/>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                <div class="flex gap-1">
+                  <% for(let i=1;i<=5;i++){%>
+                    <button type="button" @click="rating=<%= i %>" :class="rating>= <%= i %> ?'text-amber-400':'text-gray-300'" class="text-3xl hover:text-amber-400 transition-colors">★</button>
+                  <%}%>
+                  <input type="hidden" name="rating" :value="rating"/>
+                </div>
+              </div>
+              <div class="mb-3">
+                <input type="text" name="title" placeholder="Review title..." required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              </div>
+              <div class="mb-4">
+                <textarea name="comment" rows="3" placeholder="Share your experience..." required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"></textarea>
+              </div>
+              <div class="flex gap-3">
+                <button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl">Submit</button>
+                <button type="button" @click="showReviewForm=false" class="px-5 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50">Cancel</button>
+              </div>
+            </form>
+          </div>
+          <%}%>
+
+          <%if(!hotel.reviews||hotel.reviews.length===0){%>
+            <div class="text-center py-10 text-gray-400"><p class="text-4xl mb-2">💬</p><p>No reviews yet. Be the first!</p></div>
+          <%} else {%>
+            <div class="space-y-4">
+              <%hotel.reviews.forEach(r=>{%>
+                <div class="p-4 border border-gray-100 rounded-xl hover:bg-gray-50">
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm"><%= r.user?r.user.name.charAt(0).toUpperCase():'G' %></div>
+                      <div>
+                        <p class="font-semibold text-gray-800 text-sm"><%= r.user?r.user.name:'Guest' %></p>
+                        <p class="text-xs text-gray-400"><%= formatDate(r.createdAt) %></p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-amber-400 text-sm"><%for(let i=0;i<r.rating;i++){%>★<%}%><span class="text-gray-200"><%for(let i=r.rating;i<5;i++){%>★<%}%></span></span>
+                      <%if(currentUser&&(currentUser.id===r.userId||currentUser.role==='admin')){%>
+                        <form action="/reviews/<%= r.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete?')">
+                          <button type="submit" class="text-xs text-red-400 hover:text-red-600">✕</button>
+                        </form>
+                      <%}%>
+                    </div>
+                  </div>
+                  <%if(r.title){%><p class="font-semibold text-gray-800 text-sm mb-1"><%= r.title %></p><%}%>
+                  <p class="text-gray-600 text-sm"><%= r.comment %></p>
+                </div>
+              <%})%>
+            </div>
+          <%}%>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="lg:col-span-1">
+        <div class="sticky top-20 space-y-4">
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Plan Your Stay</h3>
+            <p class="text-sm text-gray-400 mb-4"><%= hotel.name %></p>
+            <%if(hotel.rooms&&hotel.rooms.length>0){%>
+              <% const cheapest=hotel.rooms.reduce((m,r)=>parseFloat(r.price)<parseFloat(m.price)?r:m,hotel.rooms[0]); %>
+              <div class="text-center p-4 bg-amber-50 rounded-xl mb-4">
+                <p class="text-xs text-gray-500 mb-1">Starting from</p>
+                <p class="text-3xl font-bold text-amber-600">$<%= parseFloat(cheapest.price).toFixed(0) %></p>
+                <p class="text-xs text-gray-400">per night</p>
+              </div>
+            <%}%>
+            <div class="space-y-2 text-sm text-gray-600 mb-5">
+              <div class="flex justify-between"><span>Check-in</span><span class="font-semibold"><%= hotel.checkInTime %></span></div>
+              <div class="flex justify-between"><span>Check-out</span><span class="font-semibold"><%= hotel.checkOutTime %></span></div>
+              <div class="flex justify-between"><span>Stars</span><span class="text-amber-400"><%= stars(hotel.stars) %></span></div>
+            </div>
+            <%if(currentUser){%>
+              <a href="#rooms" class="block w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-center rounded-xl transition-all">Select a Room</a>
+            <%} else {%>
+              <a href="/auth/login" class="block w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-center rounded-xl">Sign In to Book</a>
+            <%}%>
+          </div>
+
+          <%if(hotel.reviews&&hotel.reviews.length>0){%>
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h4 class="font-bold text-gray-800 mb-3">Rating Breakdown</h4>
+            <%for(let s=5;s>=1;s--){%>
+              <% const cnt=hotel.reviews.filter(r=>r.rating===s).length; const pct=Math.round((cnt/hotel.reviews.length)*100); %>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="text-xs text-amber-400 w-4"><%= s %>★</span>
+                <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-amber-400 h-1.5 rounded-full" style="width:<%= pct %>%"></div></div>
+                <span class="text-xs text-gray-400 w-4"><%= cnt %></span>
+              </div>
+            <%}%>
+          </div>
+          <%}%>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script>
+async function toggleFavorite(hotelId) {
+  const res = await fetch('/user/favorites/toggle', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({hotelId})
+  });
+  const d = await res.json();
+  document.getElementById('favIcon').textContent = d.favorited ? '♥' : '♡';
+  document.getElementById('favText').textContent = d.favorited ? 'Saved' : 'Save';
+  const btn = document.getElementById('favBtn');
+  btn.classList.toggle('bg-red-50', d.favorited);
+  btn.classList.toggle('text-red-500', d.favorited);
+}
+</script>
+</body>
+</html>

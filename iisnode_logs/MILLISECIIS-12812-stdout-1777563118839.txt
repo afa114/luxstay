@@ -1,0 +1,2 @@
+✅ Database connected
+🚀 Server running on http://localhost:\\.\pipe\0036e80f-91cd-41c6-a44b-db0de2278a86

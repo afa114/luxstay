@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    .hero-bg { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+    .glass { backdrop-filter: blur(16px); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    .line-clamp-2 { display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+    .line-clamp-1 { display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden; }
+  </style>
+</head>
+<body class="bg-gray-50" x-data>
+
+<%- include('partials/navbar') %>
+<%- include('partials/flash') %>
+
+<!-- HERO -->
+<section class="hero-bg min-h-screen flex items-center relative overflow-hidden pt-16">
+  <!-- Background hotel image overlay -->
+  <div class="absolute inset-0">
+    <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&q=80" 
+      alt="Luxury Hotel" class="w-full h-full object-cover opacity-25"/>
+    <div class="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/60 to-transparent"></div>
+  </div>
+
+  <!-- Floating card decoration -->
+  <div class="absolute right-8 top-1/4 hidden xl:block animate-float">
+    <div class="glass rounded-2xl p-4 w-56 text-white shadow-2xl">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-xs font-bold">JT</div>
+        <div>
+          <p class="text-xs font-semibold">John T.</p>
+          <div class="flex text-amber-400 text-xs">★★★★★</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-300">Amazing stay at Grand Palace! Absolutely breathtaking views.</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20">
+    <div class="max-w-2xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-300 text-sm font-medium mb-6">
+        <span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+        Over 500 luxury properties worldwide
+      </div>
+      <h1 class="text-5xl sm:text-6xl font-bold text-white leading-tight mb-6">
+        Find Your Perfect<br/><span class="text-amber-400">Luxury Escape</span>
+      </h1>
+      <p class="text-lg text-gray-300 mb-10 leading-relaxed">
+        Discover handpicked luxury hotels, boutique resorts, and hidden gems. Seamless booking, world-class experiences.
+      </p>
+
+      <!-- Search form -->
+      <div class="glass rounded-2xl p-4 shadow-2xl">
+        <form action="/hotels" method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="text-xs text-gray-400 mb-1 block">Where to?</label>
+            <input type="text" name="search" placeholder="City, hotel name..."
+              class="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">Category</label>
+            <select name="category" class="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="" class="bg-gray-800">All Types</option>
+              <option value="luxury" class="bg-gray-800">Luxury</option>
+              <option value="resort" class="bg-gray-800">Resort</option>
+              <option value="boutique" class="bg-gray-800">Boutique</option>
+              <option value="business" class="bg-gray-800">Business</option>
+              <option value="budget" class="bg-gray-800">Budget</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3">
+            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-amber-500/30 active:scale-95">
+              Search Hotels
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Stats -->
+      <div class="flex gap-8 mt-8">
+        <div><p class="text-2xl font-bold text-white">500+</p><p class="text-xs text-gray-400">Hotels</p></div>
+        <div><p class="text-2xl font-bold text-white">50+</p><p class="text-xs text-gray-400">Countries</p></div>
+        <div><p class="text-2xl font-bold text-white">100K+</p><p class="text-xs text-gray-400">Happy Guests</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-900 mb-3">Browse by Category</h2>
+      <p class="text-gray-500">Find exactly the type of stay you're looking for</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <% const cats = [
+        { name: 'Luxury', key: 'luxury', emoji: '👑', color: 'from-amber-400 to-orange-500', img: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&q=70' },
+        { name: 'Resort', key: 'resort', emoji: '🌴', color: 'from-teal-400 to-cyan-500', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=70' },
+        { name: 'Boutique', key: 'boutique', emoji: '✨', color: 'from-pink-400 to-rose-500', img: 'https://images.unsplash.com/photo-1455587734955-081b22074882?w=400&q=70' },
+        { name: 'Business', key: 'business', emoji: '💼', color: 'from-blue-400 to-indigo-500', img: 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?w=400&q=70' },
+        { name: 'Budget', key: 'budget', emoji: '💰', color: 'from-green-400 to-emerald-500', img: 'https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=400&q=70' }
+      ] %>
+      <% cats.forEach(cat => { %>
+        <a href="/hotels?category=<%= cat.key %>" class="group relative rounded-2xl overflow-hidden aspect-[3/4] shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <img src="<%= cat.img %>" alt="<%= cat.name %>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-3">
+            <p class="text-lg mb-0.5"><%= cat.emoji %></p>
+            <p class="text-white font-bold text-sm"><%= cat.name %></p>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED HOTELS -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-10">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900 mb-1">Featured Hotels</h2>
+        <p class="text-gray-500">Handpicked for exceptional experiences</p>
+      </div>
+      <a href="/hotels" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-full hover:bg-gray-700 transition-all">
+        View All
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% featuredHotels.forEach(hotel => { %>
+        <%- include('partials/hotel-card', { hotel }) %>
+      <% }) %>
+    </div>
+    <div class="text-center mt-10">
+      <a href="/hotels" class="inline-flex items-center gap-2 px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-full shadow-lg hover:shadow-amber-500/30 transition-all active:scale-95">
+        Explore All Hotels
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- LUXURY SPOTLIGHT -->
+<% if (luxuryHotels.length > 0) { %>
+<section class="py-16 bg-gray-900 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-10">
+      <span class="text-amber-400 text-sm font-semibold tracking-wider uppercase">Ultra Premium</span>
+      <h2 class="text-3xl font-bold mt-2">Luxury Collection</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <% luxuryHotels.forEach((hotel, i) => { %>
+        <div class="group relative rounded-2xl overflow-hidden <%= i === 0 ? 'md:row-span-2' : '' %> min-h-64">
+          <img src="<%= hotel.mainImage || 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80' %>"
+            alt="<%= hotel.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="min-height: <%= i===0?'400px':'200px' %>"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+          <div class="absolute bottom-4 left-4 right-4">
+            <div class="flex text-amber-400 text-xs mb-1"><% for(let s=0;s<hotel.stars;s++){%>★<%}%></div>
+            <h3 class="text-white font-bold text-lg leading-tight mb-1"><%= hotel.name %></h3>
+            <p class="text-gray-300 text-xs mb-3"><%= hotel.city %>, <%= hotel.country %></p>
+            <a href="/hotels/<%= hotel.slug %>" class="inline-block px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-full transition-all">
+              Explore →
+            </a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- CTA -->
+<section class="py-16 bg-gradient-to-r from-amber-500 to-orange-600">
+  <div class="max-w-4xl mx-auto text-center px-4">
+    <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Ready for Your Next Adventure?</h2>
+    <p class="text-amber-100 mb-8 text-lg">Join thousands of travelers who trust LuxStay for their luxury getaways.</p>
+    <% if (!currentUser) { %>
+      <a href="/auth/register" class="inline-block px-8 py-4 bg-white text-amber-600 font-bold text-lg rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 active:scale-95">
+        Create Free Account
+      </a>
+    <% } else { %>
+      <a href="/hotels" class="inline-block px-8 py-4 bg-white text-amber-600 font-bold text-lg rounded-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 active:scale-95">
+        Browse Hotels Now
+      </a>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+
+</body>
+</html>

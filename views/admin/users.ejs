@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Users | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100" x-data>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<div class="pt-16 min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="mb-6">
+      <a href="/admin" class="text-sm text-gray-400 hover:text-gray-600">← Dashboard</a>
+      <h1 class="text-2xl font-bold text-gray-900 mt-1">Users (<%= users.length %>)</h1>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 text-gray-500 text-xs uppercase text-left">
+            <th class="px-5 py-3 font-medium">User</th>
+            <th class="px-5 py-3 font-medium">Email</th>
+            <th class="px-5 py-3 font-medium">Phone</th>
+            <th class="px-5 py-3 font-medium">Role</th>
+            <th class="px-5 py-3 font-medium">Joined</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <% users.forEach(u => { %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm flex-shrink-0">
+                    <%= u.name.charAt(0).toUpperCase() %>
+                  </div>
+                  <span class="font-semibold text-gray-800"><%= u.name %></span>
+                </div>
+              </td>
+              <td class="px-5 py-4 text-gray-600"><%= u.email %></td>
+              <td class="px-5 py-4 text-gray-600"><%= u.phone || '—' %></td>
+              <td class="px-5 py-4">
+                <span class="px-2.5 py-1 text-xs font-bold rounded-full
+                  <%= u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' %>">
+                  <%= u.role %>
+                </span>
+              </td>
+              <td class="px-5 py-4 text-gray-500"><%= formatDate(u.createdAt) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+</body>
+</html>

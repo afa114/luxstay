@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard | LuxStay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100" x-data>
+
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+
+<div class="pt-16 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+        <p class="text-gray-500 text-sm">Welcome back, <%= currentUser.name %></p>
+      </div>
+      <div class="flex gap-3">
+        <a href="/admin/hotels/new" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition-all shadow-sm">+ Add Hotel</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-sm text-gray-500">Total Users</p>
+          <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">👤</div>
+        </div>
+        <p class="text-3xl font-bold text-gray-900"><%= totalUsers %></p>
+        <p class="text-xs text-green-500 mt-1">Registered accounts</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-sm text-gray-500">Hotels</p>
+          <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">🏨</div>
+        </div>
+        <p class="text-3xl font-bold text-gray-900"><%= totalHotels %></p>
+        <p class="text-xs text-green-500 mt-1">Active properties</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-sm text-gray-500">Bookings</p>
+          <div class="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center text-green-600">📅</div>
+        </div>
+        <p class="text-3xl font-bold text-gray-900"><%= totalBookings %></p>
+        <p class="text-xs text-green-500 mt-1">Total reservations</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-sm text-gray-500">Revenue</p>
+          <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600">💰</div>
+        </div>
+        <p class="text-3xl font-bold text-gray-900"><%= formatCurrency(revenue) %></p>
+        <p class="text-xs text-green-500 mt-1">Total earned</p>
+      </div>
+    </div>
+
+    <!-- Quick Nav -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <a href="/admin/hotels" class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 hover:border-amber-300 hover:shadow-md transition-all group">
+        <p class="text-2xl mb-2">🏨</p>
+        <p class="text-sm font-semibold text-gray-700 group-hover:text-amber-600">Manage Hotels</p>
+      </a>
+      <a href="/admin/bookings" class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 hover:border-amber-300 hover:shadow-md transition-all group">
+        <p class="text-2xl mb-2">📅</p>
+        <p class="text-sm font-semibold text-gray-700 group-hover:text-amber-600">Manage Bookings</p>
+      </a>
+      <a href="/admin/users" class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 hover:border-amber-300 hover:shadow-md transition-all group">
+        <p class="text-2xl mb-2">👥</p>
+        <p class="text-sm font-semibold text-gray-700 group-hover:text-amber-600">Manage Users</p>
+      </a>
+      <a href="/hotels" class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 hover:border-amber-300 hover:shadow-md transition-all group">
+        <p class="text-2xl mb-2">🌐</p>
+        <p class="text-sm font-semibold text-gray-700 group-hover:text-amber-600">View Site</p>
+      </a>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <h2 class="font-bold text-gray-900">Recent Bookings</h2>
+        <a href="/admin/bookings" class="text-sm text-amber-600 hover:text-amber-700 font-medium">View all →</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left bg-gray-50 text-gray-500 text-xs uppercase">
+              <th class="px-5 py-3 font-medium">Reference</th>
+              <th class="px-5 py-3 font-medium">Guest</th>
+              <th class="px-5 py-3 font-medium">Hotel</th>
+              <th class="px-5 py-3 font-medium">Dates</th>
+              <th class="px-5 py-3 font-medium">Amount</th>
+              <th class="px-5 py-3 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            <% recentBookings.forEach(b => { %>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-5 py-4 font-mono text-xs text-gray-500"><%= b.bookingRef %></td>
+                <td class="px-5 py-4 font-medium text-gray-800"><%= b.user ? b.user.name : b.guestName %></td>
+                <td class="px-5 py-4 text-gray-600"><%= b.hotel ? b.hotel.name : 'N/A' %></td>
+                <td class="px-5 py-4 text-gray-600"><%= formatDate(b.checkIn) %> → <%= formatDate(b.checkOut) %></td>
+                <td class="px-5 py-4 font-bold text-amber-600"><%= formatCurrency(b.totalPrice) %></td>
+                <td class="px-5 py-4">
+                  <span class="px-2.5 py-1 text-xs font-bold rounded-full
+                    <%= b.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                        b.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700' %> capitalize">
+                    <%= b.status %>
+                  </span>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (recentBookings.length === 0) { %>
+              <tr><td colspan="6" class="px-5 py-8 text-center text-gray-400">No bookings yet</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

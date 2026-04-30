@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Rooms | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100" x-data>
+<%- include('../../partials/navbar') %>
+<%- include('../../partials/flash') %>
+<div class="pt-16 min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <a href="/admin/hotels" class="text-sm text-gray-400 hover:text-gray-600">← Hotels</a>
+        <h1 class="text-2xl font-bold text-gray-900 mt-1">Rooms — <%= hotel.name %></h1>
+      </div>
+      <a href="/admin/hotels/<%= hotel.id %>/rooms/new" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl">+ Add Room</a>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 text-gray-500 text-xs uppercase text-left">
+            <th class="px-5 py-3 font-medium">Room</th>
+            <th class="px-5 py-3 font-medium">Type</th>
+            <th class="px-5 py-3 font-medium">Capacity</th>
+            <th class="px-5 py-3 font-medium">Bed</th>
+            <th class="px-5 py-3 font-medium">Price/Night</th>
+            <th class="px-5 py-3 font-medium">Qty</th>
+            <th class="px-5 py-3 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <% hotel.rooms.forEach(r => { %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <% if (r.image) { %><img src="<%= r.image %>" class="w-12 h-10 rounded-lg object-cover" onerror="this.style.display='none'"/><% } %>
+                  <p class="font-semibold text-gray-800"><%= r.name %></p>
+                </div>
+              </td>
+              <td class="px-5 py-4"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full capitalize"><%= r.type %></span></td>
+              <td class="px-5 py-4 text-gray-600"><%= r.capacity %> guests</td>
+              <td class="px-5 py-4 text-gray-600"><%= r.bedType %></td>
+              <td class="px-5 py-4 font-bold text-amber-600">$<%= parseFloat(r.price).toFixed(2) %></td>
+              <td class="px-5 py-4 text-gray-600"><%= r.quantity %></td>
+              <td class="px-5 py-4">
+                <div class="flex gap-2">
+                  <a href="/admin/hotels/<%= hotel.id %>/rooms/<%= r.id %>/edit" class="px-2.5 py-1 text-xs bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">Edit</a>
+                  <form action="/admin/hotels/<%= hotel.id %>/rooms/<%= r.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this room?')">
+                    <button type="submit" class="px-2.5 py-1 text-xs bg-red-100 text-red-600 rounded-lg hover:bg-red-200">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (hotel.rooms.length === 0) { %>
+            <tr><td colspan="7" class="px-5 py-8 text-center text-gray-400">No rooms yet. Add some!</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<%- include('../../partials/footer') %>
+</body>
+</html>

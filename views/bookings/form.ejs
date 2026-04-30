@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Room | LuxStay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-50" x-data="bookingForm()" x-init="init()">
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<div class="pt-16 min-h-screen">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="mb-8">
+      <a href="/hotels/<%= hotel.slug %>" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-amber-600 mb-4">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to <%= hotel.name %>
+      </a>
+      <h1 class="text-3xl font-bold text-gray-900">Complete Your Booking</h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div class="lg:col-span-3">
+        <form action="/bookings" method="POST" class="space-y-6">
+          <input type="hidden" name="roomId" value="<%= room.id %>"/>
+          <input type="hidden" name="hotelId" value="<%= hotel.id %>"/>
+
+          <!-- Dates -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Select Dates</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Check-in</label>
+                <input type="date" name="checkIn" x-model="checkIn" :min="today" @change="calcNights()" required
+                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Check-out</label>
+                <input type="date" name="checkOut" x-model="checkOut" :min="checkIn||today" @change="calcNights()" required
+                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              </div>
+            </div>
+            <div x-show="nights>0" class="mt-3 p-3 bg-amber-50 rounded-xl text-center">
+              <p class="text-amber-700 font-semibold text-sm" x-text="nights+' night'+(nights>1?'s':'')+' stay'"></p>
+              <p class="text-amber-600 font-bold text-lg" x-text="'Total: $'+total.toFixed(2)"></p>
+            </div>
+            <div x-show="availability===false" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl">
+              <p class="text-red-600 text-sm font-medium">⚠️ Room not available for selected dates.</p>
+            </div>
+            <div x-show="availability===true" class="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl">
+              <p class="text-green-600 text-sm font-medium">✓ Room is available!</p>
+            </div>
+          </div>
+
+          <!-- Guests - Adults & Children -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Guests</h2>
+
+            <!-- Adults -->
+            <div class="mb-5">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Adults (18+)</label>
+              <div class="flex items-center gap-4">
+                <button type="button" @click="adults>1&&adults--" class="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-lg font-bold text-gray-600 hover:border-amber-400 hover:text-amber-600 transition-all">−</button>
+                <span class="text-2xl font-bold text-gray-900 w-8 text-center" x-text="adults"></span>
+                <button type="button" @click="adults < <%= room.capacity %> && adults++" class="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-lg font-bold text-gray-600 hover:border-amber-400 hover:text-amber-600 transition-all">+</button>
+                <span class="text-xs text-gray-400">Max <%= room.capacity %> total guests</span>
+              </div>
+              <input type="hidden" name="adults" :value="adults"/>
+            </div>
+
+            <!-- Children -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Children (0–17)</label>
+              <div class="flex items-center gap-4">
+                <button type="button" @click="children>0&&(children--,childAges.pop())" class="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-lg font-bold text-gray-600 hover:border-amber-400 hover:text-amber-600 transition-all">−</button>
+                <span class="text-2xl font-bold text-gray-900 w-8 text-center" x-text="children"></span>
+                <button type="button" @click="(adults+children) < <%= room.capacity %> && (children++, childAges.push(2))" class="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-lg font-bold text-gray-600 hover:border-amber-400 hover:text-amber-600 transition-all">+</button>
+              </div>
+              <input type="hidden" name="children" :value="children"/>
+            </div>
+
+            <!-- Child ages -->
+            <div x-show="children>0" x-transition class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+              <p class="text-sm font-medium text-blue-800 mb-3">Please enter each child's age:</p>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <template x-for="(age, idx) in childAges" :key="idx">
+                  <div>
+                    <label class="block text-xs text-blue-600 mb-1" x-text="'Child '+(idx+1)"></label>
+                    <div class="flex items-center gap-2">
+                      <select x-model="childAges[idx]" :name="'childAges[]'"
+                        class="w-full border border-blue-200 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <template x-for="a in 18" :key="a">
+                          <option :value="a-1" x-text="(a-1)+' years old'" :selected="childAges[idx]==(a-1)"></option>
+                        </template>
+                      </select>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Total guests summary -->
+            <div class="mt-4 flex items-center gap-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-xl">
+              <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span><strong x-text="adults"></strong> adult<span x-show="adults!=1">s</span>
+              <span x-show="children>0">, <strong x-text="children"></strong> child<span x-show="children!=1">ren</span></span>
+              — Total: <strong x-text="adults+children"></strong> guests
+              </span>
+            </div>
+          </div>
+
+          <!-- Guest Details -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Guest Details</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                <input type="text" name="guestName" value="<%= currentUser?currentUser.name:'' %>" required
+                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                <input type="email" name="guestEmail" value="<%= currentUser?currentUser.email:'' %>" required
+                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                <input type="tel" name="guestPhone" placeholder="+1 555 000 0000"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Special Requests</label>
+                <textarea name="specialRequests" rows="3" placeholder="High floor, crib, early check-in..."
+                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Payment (Demo)</h2>
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl mb-4">
+              <p class="text-blue-700 text-sm">💳 Demo mode — no real payment processed.</p>
+            </div>
+            <div class="space-y-4">
+              <input type="text" placeholder="4242 4242 4242 4242" maxlength="19" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              <div class="grid grid-cols-2 gap-4">
+                <input type="text" placeholder="MM / YY" class="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+                <input type="text" placeholder="CVV" class="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" :disabled="availability===false||nights<1"
+            class="w-full py-4 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl transition-all shadow-lg active:scale-95">
+            Confirm Booking <span x-show="total>0" x-text="'— $'+total.toFixed(2)"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Room Summary -->
+      <div class="lg:col-span-2">
+        <div class="sticky top-20">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <img src="<%= room.image||'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600' %>"
+              alt="<%= room.name %>" class="w-full h-48 object-cover"
+              onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600'"/>
+            <div class="p-5">
+              <h3 class="font-bold text-gray-900 text-lg mb-1"><%= room.name %></h3>
+              <p class="text-gray-500 text-sm mb-3"><%= hotel.name %></p>
+              <div class="space-y-2 text-sm border-t border-gray-100 pt-3 mb-3">
+                <div class="flex justify-between"><span class="text-gray-500">Type</span><span class="font-medium capitalize"><%= room.type %></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Bed</span><span class="font-medium"><%= room.bedType %></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Max Guests</span><span class="font-medium"><%= room.capacity %></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Size</span><span class="font-medium"><%= room.size %>m²</span></div>
+                <div class="flex justify-between text-base border-t pt-2 mt-2"><span class="font-semibold">Price/Night</span><span class="font-bold text-amber-600">$<%= parseFloat(room.price).toFixed(2) %></span></div>
+              </div>
+              <div x-show="nights>0" class="p-3 bg-amber-50 rounded-xl text-center">
+                <p class="text-xs text-gray-500 mb-1" x-text="nights+' nights × $<%= parseFloat(room.price).toFixed(2) %>'"></p>
+                <p class="text-xl font-bold text-amber-600" x-text="'$'+total.toFixed(2)"></p>
+                <p class="text-xs text-gray-400 mt-1" x-text="(adults+children)+' guests ('+adults+' adult'+(adults!=1?'s':'')+(children>0?', '+children+' child'+(children!=1?'ren':''):'')+' )'"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script>
+function bookingForm() {
+  return {
+    checkIn: '', checkOut: '', nights: 0, total: 0,
+    pricePerNight: <%= parseFloat(room.price) %>,
+    availability: null,
+    today: new Date().toISOString().split('T')[0],
+    adults: 1, children: 0, childAges: [],
+    init() {},
+    async calcNights() {
+      if (!this.checkIn || !this.checkOut) return;
+      const d1=new Date(this.checkIn), d2=new Date(this.checkOut);
+      this.nights=Math.max(0,Math.round((d2-d1)/86400000));
+      this.total=this.nights*this.pricePerNight;
+      if (this.nights>0) {
+        try {
+          const res=await fetch('/bookings/check-availability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({roomId:<%= room.id %>,checkIn:this.checkIn,checkOut:this.checkOut})});
+          const d=await res.json();
+          this.availability=d.available;
+        } catch(e){this.availability=null;}
+      }
+    }
+  };
+}
+</script>
+</body>
+</html>

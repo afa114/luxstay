@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %> | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100" x-data>
+<%- include('../../partials/navbar') %>
+<%- include('../../partials/flash') %>
+<div class="pt-16 min-h-screen">
+  <div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="mb-6">
+      <a href="/admin/hotels/<%= hotel.id %>/rooms" class="text-sm text-gray-400 hover:text-gray-600">← Back to Rooms</a>
+      <h1 class="text-2xl font-bold text-gray-900 mt-1"><%= title %> — <%= hotel.name %></h1>
+    </div>
+    <form action="/admin/hotels/<%= hotel.id %>/rooms<%= room ? '/' + room.id + '?_method=PUT' : '' %>" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Room Name *</label>
+          <input type="text" name="name" required value="<%= room ? room.name : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+          <select name="type" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+            <% ['standard','deluxe','suite','penthouse','villa'].forEach(t => { %>
+              <option value="<%= t %>" <%= room && room.type === t ? 'selected' : '' %>><%= t.charAt(0).toUpperCase() + t.slice(1) %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Price/Night *</label>
+          <input type="number" name="price" step="0.01" required value="<%= room ? room.price : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+          <input type="number" name="capacity" value="<%= room ? room.capacity : 2 %>" min="1" max="10" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Bed Type</label>
+          <input type="text" name="bedType" value="<%= room ? room.bedType : 'King' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Size (m²)</label>
+          <input type="number" name="size" value="<%= room ? room.size : 30 %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+          <input type="number" name="floor" value="<%= room ? room.floor : 1 %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+          <input type="number" name="quantity" value="<%= room ? room.quantity : 1 %>" min="1" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea name="description" rows="3" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"><%= room ? room.description : '' %></textarea>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Amenities (comma separated)</label>
+          <input type="text" name="amenities" value="<%= room && room.amenities ? room.amenities.join(', ') : '' %>" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+          <input type="text" name="imageUrl" value="<%= room ? room.image : '' %>" placeholder="https://images.unsplash.com/..." class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"/>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Or Upload Image</label>
+          <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"/>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-all"><%= room ? 'Update Room' : 'Create Room' %></button>
+        <a href="/admin/hotels/<%= hotel.id %>/rooms" class="px-6 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../../partials/footer') %>
+</body>
+</html>

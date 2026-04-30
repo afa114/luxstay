@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Bookings | LuxStay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-50" x-data>
+
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+
+<div class="pt-16 min-h-screen">
+  <div class="bg-gray-900 text-white py-10">
+    <div class="max-w-4xl mx-auto px-4">
+      <h1 class="text-3xl font-bold mb-1">My Bookings</h1>
+      <p class="text-gray-400">Manage your reservations</p>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <% if (bookings.length === 0) { %>
+      <div class="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <p class="text-5xl mb-4">📋</p>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">No bookings yet</h3>
+        <p class="text-gray-400 mb-6">Start exploring our luxury hotels!</p>
+        <a href="/hotels" class="px-6 py-3 bg-amber-500 text-white font-semibold rounded-full hover:bg-amber-600 transition-all">Browse Hotels</a>
+      </div>
+    <% } else { %>
+      <div class="space-y-4">
+        <% bookings.forEach(b => { %>
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
+            <div class="flex flex-col sm:flex-row">
+              <% if (b.hotel && b.hotel.mainImage) { %>
+                <div class="sm:w-40 h-36 sm:h-auto flex-shrink-0">
+                  <img src="<%= b.hotel.mainImage %>" alt="" class="w-full h-full object-cover"
+                    onerror="this.src='https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&q=80'"/>
+                </div>
+              <% } %>
+              <div class="p-5 flex-1">
+                <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+                  <div>
+                    <p class="text-xs text-gray-400 font-mono mb-0.5">Ref: <%= b.bookingRef %></p>
+                    <h3 class="font-bold text-gray-900 text-lg"><%= b.hotel ? b.hotel.name : 'Hotel' %></h3>
+                    <p class="text-gray-500 text-sm"><%= b.room ? b.room.name : 'Room' %></p>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="px-3 py-1 text-xs font-bold rounded-full
+                      <%= b.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                          b.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                          b.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700' %> capitalize">
+                      <%= b.status %>
+                    </span>
+                    <span class="px-3 py-1 text-xs font-bold rounded-full
+                      <%= b.paymentStatus === 'paid' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700' %> capitalize">
+                      <%= b.paymentStatus %>
+                    </span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm mb-4">
+                  <div><p class="text-xs text-gray-400">Check-in</p><p class="font-semibold text-gray-700"><%= formatDate(b.checkIn) %></p></div>
+                  <div><p class="text-xs text-gray-400">Check-out</p><p class="font-semibold text-gray-700"><%= formatDate(b.checkOut) %></p></div>
+                  <div><p class="text-xs text-gray-400">Nights</p><p class="font-semibold text-gray-700"><%= b.nights %></p></div>
+                  <div><p class="text-xs text-gray-400">Total</p><p class="font-bold text-amber-600"><%= formatCurrency(b.totalPrice) %></p></div>
+                </div>
+                <div class="flex gap-3">
+                  <a href="/hotels/<%= b.hotel ? b.hotel.slug : '#' %>" class="px-4 py-1.5 border border-gray-200 text-gray-600 text-sm rounded-full hover:bg-gray-50 transition-all">View Hotel</a>
+                  <% if (b.status !== 'cancelled' && b.status !== 'completed') { %>
+                    <form action="/bookings/<%= b.id %>/cancel?_method=POST" method="POST" onsubmit="return confirm('Cancel this booking?')">
+                      <button type="submit" class="px-4 py-1.5 border border-red-200 text-red-500 text-sm rounded-full hover:bg-red-50 transition-all">Cancel</button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+</body>
+</html>
