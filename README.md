@@ -3,6 +3,11 @@
 A full-stack hotel booking web application built with Node.js, Express, PostgreSQL, EJS, Tailwind CSS, and Alpine.js.
 
 ---
+## 📸 Screenshots
+
+![Home Page](luxstay_home%20page.jpg)
+![All Hotels](luxstay_all_hotels.jpg)
+![Admin Panel](luxstay_admin_page.jpg)
 
 ## ✨ Features
 
